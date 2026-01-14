@@ -50,18 +50,18 @@ jobs:
         id: set-output
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo 'services=["${{ inputs.service }}"]' >> "$GITHUB_OUTPUT"
-            echo 'environment=development' >> "$GITHUB_OUTPUT"
+            echo 'services=["${{ inputs.service }}"]'
+            echo 'environment=development'
 
           elif [[ "${{ github.ref_type }}" == "tag" ]]; then
             tag="${GITHUB_REF_NAME}"        # e.g. service-a@1.2.3
             svc="${tag%%@*}"
-            echo "services=[\"$svc\"]" >> "$GITHUB_OUTPUT"
-            echo 'environment=production' >> "$GITHUB_OUTPUT"
+            echo "services=[\"$svc\"]"
+            echo 'environment=production'
 
           else # push to main
-            echo 'services=${{ steps.filter.outputs.changes }}' >> "$GITHUB_OUTPUT"
-            echo 'environment=staging' >> "$GITHUB_OUTPUT"
+            echo 'services=${{ steps.filter.outputs.changes }}'
+            echo 'environment=staging'
           fi
 
   build-push-container-images:
