@@ -7,7 +7,7 @@ import logging
 
 terminate = False
 
-# test
+# tes
 
 def run_load_generator(api_url, delay_ms):
     global terminate
