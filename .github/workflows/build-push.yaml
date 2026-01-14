@@ -80,16 +80,16 @@ jobs:
       - uses: ./.github/actions/setup-dependencies
         with:
           install_task: "true"
-      - name: Login to Docker Hub
-        if: ${{ !env.ACT }}
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@05340d1c670183e7caabdb33ae9f1c80fae3b0c2 # v3.6.0
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@1583c0f09d26c58c59d25b0eef29792b7ce99d9a # v3.11.1
+      # - name: Login to Docker Hub
+      #   if: ${{ !env.ACT }}
+      #   uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
+      #   with:
+      #     username: ${{ vars.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # - name: Set up QEMU
+      #   uses: docker/setup-qemu-action@05340d1c670183e7caabdb33ae9f1c80fae3b0c2 # v3.6.0
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@1583c0f09d26c58c59d25b0eef29792b7ce99d9a # v3.11.1
       - name: Compute image tag
         id: image-tag
         working-directory: ${{ matrix.service }}
@@ -113,27 +113,27 @@ jobs:
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "image_tag=${image_tag}" >> "$GITHUB_OUTPUT"
 
-      - name: Build and push Docker images
-        uses: docker/build-push-action@ccc2b40e9ea6518f9252a22a990f8e868370f62e # v6.18.0
-        with:
-          context: ${{ matrix.service }}
-          push: ${{ !env.ACT }} # Don't push images when running locally
-          tags: ${{ steps.image-tag.outputs.image_tag }}
-          platforms: linux/amd64 # TODO: add multi arch "linux/amd64,linux/arm64"
-          # TODO: handle cache invalidation for version changes in package.json
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      # - name: Build and push Docker images
+      #   uses: docker/build-push-action@ccc2b40e9ea6518f9252a22a990f8e868370f62e # v6.18.0
+      #   with:
+      #     context: ${{ matrix.service }}
+      #     push: ${{ !env.ACT }} # Don't push images when running locally
+      #     tags: ${{ steps.image-tag.outputs.image_tag }}
+      #     platforms: linux/amd64 # TODO: add multi arch "linux/amd64,linux/arm64"
+      #     # TODO: handle cache invalidation for version changes in package.json
+      #     cache-from: type=gha
+      #     cache-to: type=gha,mode=max
 
-      # Trigger deploy as a separate workflow to:
-      #   1. enable running it manually via workflow_dispatch
-      #   2. keep workflows smaller and more focused
-      # We could use reuseable workflow (with workflow_call trigger... but being able to trigger manually is nice)
-      - name: Trigger Deploy
-        if: ${{ !env.ACT }} # Don't trigger deploy when running locally
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh workflow run update-gitops-manifests.yaml \
-            -f service=${{ matrix.service }} \
-            -f version=${{ steps.image-tag.outputs.version }} \
-            -f environment=${{ needs.filter.outputs.environment }}
+      # # Trigger deploy as a separate workflow to:
+      # #   1. enable running it manually via workflow_dispatch
+      # #   2. keep workflows smaller and more focused
+      # # We could use reuseable workflow (with workflow_call trigger... but being able to trigger manually is nice)
+      # - name: Trigger Deploy
+      #   if: ${{ !env.ACT }} # Don't trigger deploy when running locally
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     gh workflow run update-gitops-manifests.yaml \
+      #       -f service=${{ matrix.service }} \
+      #       -f version=${{ steps.image-tag.outputs.version }} \
+      #       -f environment=${{ needs.filter.outputs.environment }}
